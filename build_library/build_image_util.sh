@@ -739,6 +739,17 @@ EOF
   fi
   sudo rm -rf "${root_fs_dir}/usr/share/flatcar/etc"
   sudo cp -a "${root_fs_dir}/etc" "${root_fs_dir}/usr/share/flatcar/etc"
+  # Now set it up as confext and enable it by default
+  sudo mkdir -p "${root_fs_dir}/usr/share/flatcar/etc/extension-release.d/"
+  echo ID=_any | sudo tee "${root_fs_dir}/usr/share/flatcar/etc/extension-release.d/extension-release.flatcar-etc" > /dev/null
+  # Workaround: With --root= systemd-confext does not follow symlinks
+  # and we have to place the dir in confexts/ and symlink to it from
+  # our old location instead of symlinking from confexts/ (where we
+  # could use /usr/share/flatcar as confext because only the etc/
+  # subfolder is used - note that relative symlinks should be used)
+  sudo mkdir -p "${root_fs_dir}/usr/lib/confexts/flatcar-etc"
+  sudo mv "${root_fs_dir}/usr/share/flatcar/etc" "${root_fs_dir}/usr/lib/confexts/flatcar-etc/."
+  sudo ln -s ../../lib/confexts/flatcar-etc/etc "${root_fs_dir}/usr/share/flatcar/etc"
 
   # Remove the rootfs state as it should be recreated through the
   # tmpfiles and may not be present on updating machines. This

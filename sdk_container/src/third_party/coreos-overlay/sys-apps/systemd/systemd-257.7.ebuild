@@ -588,8 +588,9 @@ multilib_src_install_all() {
 	# Flatcar: enable reboot.target (not enabled - has no WantedBy
 	# entry)
 
-	# Flatcar: enable systemd-sysext.service by default
+	# Flatcar: enable systemd-sysext.service and systemd-confext.service by default
 	builddir_systemd_enable_service sysinit.target systemd-sysext.service
+	builddir_systemd_enable_service sysinit.target systemd-confext.service
 
 	# Flatcar: Use an empty preset file, because systemctl
 	# preset-all puts symlinks in /etc, not in /usr. We don't use
