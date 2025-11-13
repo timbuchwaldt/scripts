@@ -78,6 +78,9 @@ build_target_toolchain() {
     # systemd[cryptsetup] -> cryptsetup -> tmpfiles[systemd] -> systemd
     # systemd[curl] -> curl -> nghttp2[systemd] -> systemd
     #     importd requires curl, so needs to be disabled too
+    # systemd[pam] -> pam[systemd] -> systemd
+    #     not dropping pam from sys-apps/systemd, otherwise we would
+    #     need to drop pam from sys-auth/pambase
     # systemd[tpm] -> tpm2-tss -> tmpfiles[systemd] -> systemd
     # util-linux[audit] -> audit[python] -> python -> util-linux
     # util-linux[cryptsetup] -> cryptsetup -> util-linux
@@ -90,6 +93,7 @@ build_target_toolchain() {
         sys-apps/systemd cryptsetup,curl,importd,tpm
         sys-apps/util-linux audit,cryptsetup,pam,selinux,su,systemd,udev
         sys-libs/glibc nscd,selinux
+        sys-libs/pam systemd
     )
     BDL_ROOT=${ROOT} \
     BDL_PORTAGEQ=btt_bdl_portageq \
