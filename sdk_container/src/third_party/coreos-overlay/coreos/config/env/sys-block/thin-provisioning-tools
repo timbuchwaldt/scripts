@@ -1,0 +1,3 @@
+# This is to disable building thin_migrate tool.
+export ECARGO_EXTRA_ARGS=--no-default-features
+export MAKEOPTS=THIN_MIGRATE_EXCLUDE=x

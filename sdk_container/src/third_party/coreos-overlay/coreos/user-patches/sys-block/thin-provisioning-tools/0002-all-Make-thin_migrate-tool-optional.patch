@@ -1,0 +1,104 @@
+From a812833979c0f9003d93f5140c293803b3f88b8c Mon Sep 17 00:00:00 2001
+From: Krzesimir Nowak <knowak@microsoft.com>
+Date: Thu, 20 Nov 2025 13:17:36 +0100
+Subject: [PATCH 2/2] [all] Make thin_migrate tool optional
+
+The tool pulls in, indirectly through the devicemapper crate, a
+dependency on libclang. Make it possible to skip the tool to avoid the
+dependency, but keep it enabled by default.
+
+Signed-off-by: Krzesimir Nowak <knowak@microsoft.com>
+---
+ Cargo.toml             | 4 +++-
+ Makefile               | 5 ++++-
+ src/bin/pdata_tools.rs | 1 +
+ src/commands/mod.rs    | 1 +
+ src/thin/mod.rs        | 1 +
+ 5 files changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/Cargo.toml b/Cargo.toml
+index 47703bfc..324c4f5b 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -19,7 +19,7 @@ clap = { version = "4.5", default-features = false, features = [
+ ] }
+ crc32c = "0.6"
+ data-encoding = "2.5"
+-devicemapper = "0.34.3"
++devicemapper ={ version = "0.34.3", optional = true }
+ exitcode = "1.1.2"
+ fixedbitset = "0.4"
+ flate2 = "1.0"
+@@ -54,9 +54,11 @@ tempfile = "3.6"
+ thinp = { path = ".", features = ["devtools"] }
+ 
+ [features]
++default = ["migrate"]
+ devtools = ["tui", "termion"]
+ io_uring = ["dep:rio"]
+ no_cleanup = []
++migrate = ["dep:devicemapper"]
+ 
+ [profile.release]
+ debug = true
+diff --git a/Makefile b/Makefile
+index 505aa5b0..a9519661 100644
+--- a/Makefile
++++ b/Makefile
+@@ -48,13 +48,16 @@ TOOLS:=\
+ 	thin_metadata_size \
+ 	thin_metadata_pack \
+ 	thin_metadata_unpack \
+-	thin_migrate \
+ 	thin_trim \
+ 	era_check \
+ 	era_dump \
+ 	era_invalidate \
+ 	era_restore
+ 
++ifeq ($(THIN_MIGRATE_EXCLUDE),)
++TOOLS:=$(TOOLS) thin_migrate
++endif
++
+ MANPAGES:=$(patsubst %,man8/%.8,$(TOOLS))
+ 
+ install: $(MANPAGES)
+diff --git a/src/bin/pdata_tools.rs b/src/bin/pdata_tools.rs
+index c288fe03..6460b474 100644
+--- a/src/bin/pdata_tools.rs
++++ b/src/bin/pdata_tools.rs
+@@ -29,6 +29,7 @@ fn register_commands<'a>() -> Vec<Box<dyn Command<'a>>> {
+         Box::new(thin_metadata_pack::ThinMetadataPackCommand),
+         Box::new(thin_metadata_size::ThinMetadataSizeCommand),
+         Box::new(thin_metadata_unpack::ThinMetadataUnpackCommand),
++        #[cfg(feature = "migrate")]
+         Box::new(thin_migrate::ThinMigrateCommand),
+         Box::new(thin_repair::ThinRepairCommand),
+         Box::new(thin_restore::ThinRestoreCommand),
+diff --git a/src/commands/mod.rs b/src/commands/mod.rs
+index 5eeb66ab..b2401857 100644
+--- a/src/commands/mod.rs
++++ b/src/commands/mod.rs
+@@ -17,6 +17,7 @@ pub mod thin_ls;
+ pub mod thin_metadata_pack;
+ pub mod thin_metadata_size;
+ pub mod thin_metadata_unpack;
++#[cfg(feature = "migrate")]
+ pub mod thin_migrate;
+ pub mod thin_repair;
+ pub mod thin_restore;
+diff --git a/src/thin/mod.rs b/src/thin/mod.rs
+index 1ef0e1be..64e9518b 100644
+--- a/src/thin/mod.rs
++++ b/src/thin/mod.rs
+@@ -10,6 +10,7 @@ pub mod ls;
+ pub mod metadata;
+ pub mod metadata_repair;
+ pub mod metadata_size;
++#[cfg(feature = "migrate")]
+ pub mod migrate;
+ pub mod repair;
+ pub mod restore;
+-- 
+2.51.0
+
