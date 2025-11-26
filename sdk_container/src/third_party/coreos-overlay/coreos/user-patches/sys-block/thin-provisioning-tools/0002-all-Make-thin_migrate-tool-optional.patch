@@ -1,4 +1,4 @@
-From 3bc0c0cd4a1e8897f005ccfe63639f8b3961ba9a Mon Sep 17 00:00:00 2001
+From 74215dade7bbddbfc0a46e1903fc289a56df3915 Mon Sep 17 00:00:00 2001
 From: Krzesimir Nowak <knowak@microsoft.com>
 Date: Thu, 20 Nov 2025 13:17:36 +0100
 Subject: [PATCH 2/2] [all] Make thin_migrate tool optional
@@ -42,7 +42,7 @@ index 8594c6ba..155285a8 100644
  [profile.release]
  debug = true
 diff --git a/Makefile b/Makefile
-index c31be836..0a716d26 100644
+index 44c99c99..a2dd51a4 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,9 +2,10 @@ V=@
